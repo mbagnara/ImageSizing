@@ -6,16 +6,18 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 <script>
 var originalWidth, originalHeight;
+var originalFileName = "";
 
 function displayImage(event) {
     var image = document.getElementById('imageToResize');
-    // Reset the form and clear previous image info
     resetForm();
+    originalFileName = event.target.files[0].name;
     image.src = URL.createObjectURL(event.target.files[0]);
     image.onload = function() {
         originalWidth = image.width;
         originalHeight = image.height;
         document.getElementById('currentSize').textContent = "Current Size: " + originalWidth + "px by " + originalHeight + "px";
+        updateFileName();
     }
 }
 
@@ -34,35 +36,35 @@ function updateHeight() {
     var inputWidth = document.getElementById("inputWidth").value;
     var proportionalHeight = (inputWidth / originalWidth) * originalHeight;
     document.getElementById("inputHeight").value = Math.round(proportionalHeight);
+    updateFileName();
+}
+
+function updateFileName() {
+    var width = document.getElementById("inputWidth").value;
+    var height = document.getElementById("inputHeight").value;
+    if (originalFileName && width && height) {
+        var baseName = originalFileName.replace(/\.[^/.]+$/, "");
+        var extension = originalFileName.split('.').pop();
+        document.getElementById("imageName").value = baseName + width + 'px' + height + 'px.' + extension;
+    }
 }
 
 function resizeImage() {
-    // Get user input for height and width from text fields
     var height = document.getElementById("inputHeight").value;
     var width = document.getElementById("inputWidth").value;
-
-    // Access the image element
     var img = document.getElementById("imageToResize");
-
-    // Set the height and width of the image
     img.style.height = height + "px";
     img.style.width = width + "px";
 }
 
 function downloadImage() {
     var image = document.getElementById('imageToResize');
-    var imageName = document.getElementById("imageName").value + ".png";
+    var imageName = document.getElementById("imageName").value;
     var imageCanvas = document.createElement('canvas');
     var ctx = imageCanvas.getContext('2d');
-
-    // Set canvas dimensions to the resized image dimensions
     imageCanvas.width = image.width;
     imageCanvas.height = image.height;
-
-    // Draw image on canvas
     ctx.drawImage(image, 0, 0, image.width, image.height);
-
-    // Convert canvas to data URL and trigger download
     var imageURI = imageCanvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
     var link = document.createElement('a');
     link.download = imageName;
@@ -76,31 +78,23 @@ function downloadImage() {
 <body class="container py-5">
 <h2>Select an image to display and resize.</h2>
 
-<!-- Input to select an image file -->
 <div class="mb-3">
     <input type="file" class="form-control" onchange="displayImage(event)">
 </div>
 
 <h3 id="currentSize">Current Size: Unknown</h3>
 
-<!-- Fields for width and height -->
 <div class="input-group mb-3">
     <input type="text" id="inputWidth" class="form-control" placeholder="Width in pixels" oninput="updateHeight()">
     <input type="text" id="inputHeight" class="form-control" placeholder="Height in pixels" readonly>
 </div>
 
-<!-- Field for image name before download -->
 <div class="mb-3">
     <input type="text" id="imageName" class="form-control" placeholder="Enter a name for the downloaded image">
 </div>
 
-<!-- Button to trigger the resizing -->
 <button class="btn btn-primary" onclick="resizeImage()">Resize Image</button>
-
-<!-- Button to download the resized image -->
 <button class="btn btn-success" onclick="downloadImage()">Download Image</button>
-
-<!-- Image that will be resized -->
 <img id="imageToResize" alt="No image loaded" style="max-width:100%; display: block; margin-top: 20px;">
 
 </body>

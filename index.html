@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Image Resizer</title>
+<script>
+function displayImage(event) {
+    var image = document.getElementById('imageToResize');
+    image.src = URL.createObjectURL(event.target.files[0]);
+    image.onload = function() {
+        document.getElementById('currentSize').textContent = "Current Size: " + image.width + "px by " + image.height + "px";
+    }
+}
+
+function resizeImage() {
+    // Get user input for height and width
+    var height = prompt("Enter the height (in pixels):");
+    var width = prompt("Enter the width (in pixels):");
+
+    // Access the image element
+    var img = document.getElementById("imageToResize");
+
+    // Set the height and width of the image
+    img.style.height = height + "px";
+    img.style.width = width + "px";
+}
+
+function downloadImage() {
+    var image = document.getElementById('imageToResize');
+    var imageName = prompt("Enter a name for the downloaded image:") + ".png";
+    var imageCanvas = document.createElement('canvas');
+    var ctx = imageCanvas.getContext('2d');
+
+    // Set canvas dimensions to the resized image dimensions
+    imageCanvas.width = image.width;
+    imageCanvas.height = image.height;
+
+    // Draw image on canvas
+    ctx.drawImage(image, 0, 0, image.width, image.height);
+
+    // Convert canvas to data URL and trigger download
+    var imageURI = imageCanvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+    var link = document.createElement('a');
+    link.download = imageName;
+    link.href = imageURI;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
+</head>
+<body>
+<h2>Select an image to display and resize.</h2>
+
+<!-- Input to select an image file -->
+<input type="file" onchange="displayImage(event)">
+
+<h3 id="currentSize">Current Size: Unknown</h3>
+
+<!-- Button to trigger the resizing -->
+<button onclick="resizeImage()">Resize Image</button>
+
+<!-- Button to download the resized image -->
+<button onclick="downloadImage()">Download Image</button>
+
+<!-- Image that will be resized -->
+<img id="imageToResize" alt="No image loaded" style="max-width:100%;">
+
+</body>
+</html>
